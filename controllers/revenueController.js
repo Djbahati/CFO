@@ -1,11 +1,17 @@
-const axios = require('axios');
+const Revenue = require('../models/Revenue');
 
 exports.submitData = async (req, res) => {
-    const { data } = req.body;
+    const { data } = req.body || {};
+    if (!data) {
+        return res.status(400).json({ message: 'Revenue data is required' });
+    }
+
     try {
-        await axios.post('https://revenue-authority-api.com/submit', data);
-        res.status(200).json({ message: 'Data submitted successfully' });
+        const revenue = new Revenue({ data });
+        await revenue.save();
+        res.status(200).json({ message: 'Data submitted successfully', revenue });
     } catch (error) {
-        res.status(500).json({ message: 'Data submission failed' });
+        console.error('Revenue submission error:', error);
+        res.status(500).json({ message: 'Data submission failed', error: error.message });
     }
 };
